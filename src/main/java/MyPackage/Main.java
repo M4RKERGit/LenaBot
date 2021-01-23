@@ -1,10 +1,9 @@
 package MyPackage;
 
-import MyPackage.Bot;
+import MyPackage.BotPack.Bot;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.ApiContextInitializer;
-
 import java.util.Locale;
 
 public class Main
