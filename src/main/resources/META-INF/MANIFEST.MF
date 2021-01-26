@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Main-Class: MyPackage.Main
+Main-Class: WBPackage.Main
 Class-Path: snappy-0.4.jar maven-shared-utils-3.2.1.jar plexus-component
  -annotations-1.5.5.jar lombok-1.18.16.jar sisu-inject-plexus-1.4.2.jar 
  plexus-cipher-1.4.jar maven-compiler-plugin-3.8.1.jar maven-plugin-api-
