@@ -54,7 +54,7 @@ public class RandomTools
         String log = curDate + " Received: " + message.getText() + " " + "From: " + user;
         System.out.println(log);
         try {
-            Files.write(Path.of("E://botlog.txt"), (log + "\n").getBytes(), new StandardOpenOption[]{StandardOpenOption.APPEND});
+            Files.write(Path.of("botlog.txt"), (log + "\n").getBytes(), new StandardOpenOption[]{StandardOpenOption.APPEND});
         } catch (IOException e) {
             e.printStackTrace();
         }

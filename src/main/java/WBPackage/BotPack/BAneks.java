@@ -1,7 +1,9 @@
 package WBPackage.BotPack;
 
+import lombok.SneakyThrows;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.telegram.telegrambots.meta.api.methods.send.SendVoice;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.nio.file.Files;
@@ -15,7 +17,9 @@ public class BAneks
 {
     public static String getHTML() throws IOException {
         Random random = new Random();
-        URL anekURL = new URL("https://baneks.ru/" + (1 + random.nextInt(1142)));
+        int rolled = 1 + random.nextInt(1142);
+        URL anekURL = new URL("https://baneks.ru/" + (rolled));
+
         BufferedReader html = new BufferedReader(new InputStreamReader(anekURL.openConnection().getInputStream()));
         String inputLine;
         StringBuilder response = new StringBuilder();
@@ -48,9 +52,20 @@ public class BAneks
         String log = curDate + " Received: " + message.getText() + " " + "From: " + user;
         System.out.println(log);
         try {
-            Files.write(Path.of("E://botlog.txt"), (log + "\n").getBytes(), new StandardOpenOption[]{StandardOpenOption.APPEND});
+            Files.write(Path.of("botlog.txt"), (log + "\n").getBytes(), new StandardOpenOption[]{StandardOpenOption.APPEND});
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @SneakyThrows
+    public static void getVoice(SendVoice sendVoice)
+    {
+        Random random = new Random();
+        int rolled = 1 + random.nextInt(1142);
+        Process process = Runtime.getRuntime().exec("/usr/bin/python3 /root/MT/anek.py " + rolled);
+        process.waitFor();
+        System.out.println("exe finished");
+        sendVoice.setVoice(new File("tts_output.ogg"));
     }
 }

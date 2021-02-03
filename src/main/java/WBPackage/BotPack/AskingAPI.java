@@ -2,6 +2,8 @@ package WBPackage.BotPack;
 
 import JSONdecode.Json;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.io.FileNotFoundException;
@@ -15,13 +17,11 @@ import java.util.Scanner;
 
 public class AskingAPI
 {
-    public static String getWeather(String cityName) throws IOException {
-        String outPut = "";
-        String decOut = "";
+    @SneakyThrows
+    public static void getWeather(String cityName, SendMessage sendMessage) {
+        String outPut;
         Scanner rec;
-        String linkAddr = "http://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&APPID=/OpenWeatherAPI Token here\&lang=ru";		//не забудьте вставить сюда свой токен
-        try
-        {
+        String linkAddr = "http://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&APPID=&lang=ru";	//сюда вписать токен
             HttpURLConnection conTar = (HttpURLConnection) new URL(linkAddr).openConnection();
             conTar.connect();
             try
@@ -31,31 +31,21 @@ public class AskingAPI
             }
             catch (FileNotFoundException exception)
             {
-                outPut = "Сорри, но я не нашёл такого города/страны, попробуй проверить правильность написания";
+                outPut = "Сорри, но я не нашла такого города/страны, попробуй проверить правильность написания";
                 System.out.println(cityName + "\n" + outPut);
-                return outPut;
+                sendMessage.setText(outPut);
             }
             conTar.disconnect();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-
         System.out.println(outPut);
-
         Json outJSON = getJSON(outPut);
-        decOut = getReport(outJSON);
-
-        return decOut;
+        sendMessage.setText(getReport(outJSON));
     }
 
-    public static String getWeather(float longitude, float latitude) throws IOException {
+    @SneakyThrows
+    public static void getWeather(float longitude, float latitude, SendMessage sendMessage) {
         String outPut = "";
-        String decOut = "";
         Scanner rec;
-        String linkAddr = "http://api.openweathermap.org/data/2.5/weather?lat=" + latitude + "&lon=" + longitude + "&APPID=/OpenWeatherAPI Token here\&lang=ru";		//и сюда
+        String linkAddr = "http://api.openweathermap.org/data/2.5/weather?lat=" + latitude + "&lon=" + longitude + "&APPID=&lang=ru";	//сюда вписать токен
         try
         {
             HttpURLConnection conTar = (HttpURLConnection) new URL(linkAddr).openConnection();
@@ -67,9 +57,9 @@ public class AskingAPI
             }
             catch (FileNotFoundException exception)
             {
-                outPut = "Сорри, но я не нашёл такого города/страны, попробуй проверить правильность написания";
+                sendMessage.setText("Сорри, но я не нашла такого города/страны, попробуй проверить правильность написания");
                 System.out.println(latitude + "\n" + longitude + "\n" + outPut);
-                return outPut;
+                return;
             }
             conTar.disconnect();
         }
@@ -77,20 +67,14 @@ public class AskingAPI
         {
             e.printStackTrace();
         }
-
-
         System.out.println(outPut);
-
         Json outJSON = AskingAPI.getJSON(outPut);
-        decOut = AskingAPI.getReport(outJSON);
-
-        return decOut;
+        sendMessage.setText(AskingAPI.getReport(outJSON));
     }
 
     public static Json getJSON(String receivedJSON) throws IOException {
         ObjectMapper JSONMapper = new ObjectMapper();
-        Json unlocked = JSONMapper.readValue(receivedJSON, Json.class);
-        return unlocked;
+        return JSONMapper.readValue(receivedJSON, Json.class);
     }
 
     public static String getReport(Json receivedJSON)
@@ -123,7 +107,7 @@ public class AskingAPI
         String log = curDate + " Received: " + message.getText() + " " + "From: " + user;
         System.out.println(log);
         try {
-            Files.write(Path.of("E://botlog.txt"), (log + "\n").getBytes(), new StandardOpenOption[]{StandardOpenOption.APPEND});
+            Files.write(Path.of("botlog.txt"), (log + "\n").getBytes(), new StandardOpenOption[]{StandardOpenOption.APPEND});
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -134,7 +118,7 @@ public class AskingAPI
         String log = curDate + " Received: Coordinates: " + "long: " + longitude + " lat: " + latitude + " " + "From: " + user;
         System.out.println(log);
         try {
-            Files.write(Path.of("E://botlog.txt"), (log + "\n").getBytes(), new StandardOpenOption[]{StandardOpenOption.APPEND});
+            Files.write(Path.of("botlog.txt"), (log + "\n").getBytes(), new StandardOpenOption[]{StandardOpenOption.APPEND});
         } catch (IOException e) {
             e.printStackTrace();
         }
