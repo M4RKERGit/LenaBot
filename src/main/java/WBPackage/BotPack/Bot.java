@@ -11,8 +11,7 @@ import java.util.Date;
 import java.util.Random;
 
 
-public class Bot extends TelegramLongPollingBot
-{
+public class Bot extends TelegramLongPollingBot {
     SendMessage sendMessage;
     SendSticker sendSticker;
     SendAudio sendMusic;
@@ -22,11 +21,9 @@ public class Bot extends TelegramLongPollingBot
 
     @SneakyThrows
     @Override
-    public void onUpdateReceived(Update update)
-    {
+    public void onUpdateReceived(Update update) {
         String curDate = new Date().toString();
-        if (update.hasMessage())
-        {
+        if (update.hasMessage()) {
             update.getUpdateId();
             sendMessage = new SendMessage().setChatId(update.getMessage().getChatId());
             sendSticker = new SendSticker().setChatId(update.getMessage().getChatId());
@@ -36,16 +33,14 @@ public class Bot extends TelegramLongPollingBot
             String cityName;
             String user = update.getMessage().getFrom().getFirstName() + " " + update.getMessage().getFrom().getLastName();
 
-            if (update.getMessage().hasSticker())
-            {
+            if (update.getMessage().hasSticker()) {
                 SlashOptions.appendLog(update.getMessage(), curDate, user);
                 sendSticker.setSticker("CAACAgIAAxkBAAO5X_uh9OZW2YeSp59mOxJzfZt0Gq4AAgIAA80GggdFY1HBL8mAoR4E");
                 execute(sendSticker);
                 return;
             }
 
-            if (update.getMessage().hasLocation())
-            {
+            if (update.getMessage().hasLocation()) {
                 float longitude = update.getMessage().getLocation().getLongitude();
                 float latitude = update.getMessage().getLocation().getLatitude();
                 AskingAPI.appendLog(curDate, user, latitude, longitude);
@@ -54,11 +49,9 @@ public class Bot extends TelegramLongPollingBot
                 return;
             }
 
-            if (update.getMessage().hasText())
-            {
+            if (update.getMessage().hasText()) {
                 String lowCase = update.getMessage().getText().toLowerCase();
-                switch(lowCase)
-                {
+                switch (lowCase) {
                     case ("музяка"):
                         MusicFeatures.appendLog(update.getMessage(), curDate, user);
                         MusicFeatures.randPlayer(sendMessage, sendMusic);
@@ -79,7 +72,7 @@ public class Bot extends TelegramLongPollingBot
                         BAneks.getVoice(sendVoice);
                         execute(sendVoice);
                         return;
-                    case("пикча"):
+                    case ("пикча"):
                         SlashOptions.appendLog(update.getMessage(), curDate, user);
                         PictureFeatures.getPic(sendPhoto, sendMessage);
                         execute(sendMessage);
@@ -115,18 +108,18 @@ public class Bot extends TelegramLongPollingBot
                         execute(sendSticker);
                         return;
                     default:
-                        if (lowCase.contains("пикча"))
-                        {
+                        if (lowCase.contains("пикча")) {
                             sendMessage.setText("Один момент, уже ищу...");
                             execute(sendMessage);
                             MusicFeatures.appendLog(update.getMessage(), curDate, user);
                             PictureFeatures.getPic(sendPhoto, sendMessage, update.getMessage().getText());
                             execute(sendMessage);
-                            execute(sendPhoto);
+                            if (sendPhoto.getPhoto() != null) {
+                                execute(sendPhoto);
+                            }
                             return;
                         }
-                        if (lowCase.contains("ютуб"))
-                        {
+                        if (lowCase.contains("ютуб")) {
                             sendMessage.setText("Один момент, уже ищу...");
                             execute(sendMessage);
                             MusicFeatures.appendLog(update.getMessage(), curDate, user);
@@ -135,15 +128,13 @@ public class Bot extends TelegramLongPollingBot
                             execute(sendMusic);
                             return;
                         }
-                        if (lowCase.contains("рандом"))
-                        {
+                        if (lowCase.contains("рандом")) {
                             RandomTools.appendLog(update.getMessage(), curDate, user);
                             sendMessage.setText("Зароллено: " + RandomTools.replyRand(update.getMessage().getText()));
                             execute(sendMessage);
                             return;
                         }
-                        if (!update.getMessage().getText().equals(""))
-                        {
+                        if (!update.getMessage().getText().equals("")) {
                             AskingAPI.appendLog(update.getMessage(), curDate, user);
                             cityName = update.getMessage().getText();
                             AskingAPI.getWeather(cityName, sendMessage);
@@ -155,37 +146,46 @@ public class Bot extends TelegramLongPollingBot
     }
 
     @SneakyThrows
-    public void reportOleg()
-    {
+    public void reportOleg() {
         Random random = new Random();
-        SendMessage reportOleg = new SendMessage().setChatId();	  //функция для уведомления о включении/выключении бота вам в ЛС, необходимо указать ваш ID
-        String[] comms = new String[] {"Олеж, я в работе :3", "Готова ебашить!", "Лучший бот в мире снова в строю!"};
+        SendMessage reportOleg = new SendMessage().setChatId(247725614L);
+        String[] comms = new String[]{"Олеж, я в работе :3", "Готова ебашить!", "Лучший бот в мире снова в строю!"};
         reportOleg.setText(comms[random.nextInt(3)]);
         execute(reportOleg);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            Random random1 = new Random();
-            SendMessage reportOleg1 = new SendMessage().setChatId();
-            String[] comms1 = new String[] {"Ливаю", "Я устал, я мухожук", "*dies from cringe*"};
-            reportOleg1.setText(comms1[random1.nextInt(3)]);
-            try {
-                execute(reportOleg1);
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-            }
-        }
-        )
+                    Random random1 = new Random();
+                    SendMessage reportOleg1 = new SendMessage().setChatId(247725614L);
+                    String[] comms1 = new String[]{"Ливаю", "Я устал, я мухожук", "*dies from cringe*"};
+                    reportOleg1.setText(comms1[random1.nextInt(3)]);
+                    try {
+                        execute(reportOleg1);
+                    } catch (TelegramApiException e) {
+                        e.printStackTrace();
+                    }
+                }
+                )
         );
     }
 
-    @Override
+    /*@Override
     public String getBotUsername()
     {
-        return "";	//сюда вписать юзернейм бота
+        return "mt_develop_bot";
     }
 
     @Override
     public String getBotToken()
     {
-        return "";	//сюда вписать токен
+        return "1680017281:AAEydjhRJLlFBsV6__w6F7qO1G2mHiT9Mw0";
+    }*/
+
+    @Override
+    public String getBotUsername() {
+        return "weather_test228_bot";
+    }
+
+    @Override
+    public String getBotToken() {
+        return "1461054874:AAEOtBLWMx9OQbBH75nG7iFFSJ9sD-giSCk";
     }
 }

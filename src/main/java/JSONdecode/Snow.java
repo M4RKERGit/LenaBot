@@ -1,8 +1,8 @@
 package JSONdecode;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Snow
-{
+public class Snow {
     public double getHour() {
         return hour;
     }

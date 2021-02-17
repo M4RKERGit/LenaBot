@@ -1,7 +1,6 @@
 package PictureJSON;
 
-public class Picture
-{
+public class Picture {
     public long getId() {
         return id;
     }
@@ -178,26 +177,26 @@ public class Picture
         this.userImageURL = userImageURL;
     }
 
-    long id;
-    String pageURL;
-    String type;
-    String tags;
-    String previewURL;
-    int previewWidth;
-    int previewHeight;
-    String webformatURL;
-    int webformatWidth;
-    int webformatHeight;
-    String largeImageURL;
-    int imageWidth;
-    int imageHeight;
-    long imageSize;
-    long views;
-    long downloads;
-    long favorites;
-    long likes;
-    long comments;
-    long user_id;
-    String user;
-    String userImageURL;
+    private long id;
+    private String pageURL;
+    private String type;
+    private String tags;
+    private String previewURL;
+    private int previewWidth;
+    private int previewHeight;
+    private String webformatURL;
+    private int webformatWidth;
+    private int webformatHeight;
+    private String largeImageURL;
+    private int imageWidth;
+    private int imageHeight;
+    private long imageSize;
+    private long views;
+    private long downloads;
+    private long favorites;
+    private long likes;
+    private long comments;
+    private long user_id;
+    private String user;
+    private String userImageURL;
 }

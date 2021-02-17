@@ -63,5 +63,5 @@ Class-Path: snappy-0.4.jar maven-shared-utils-3.2.1.jar plexus-component
  0.jar commons-compress-1.19.jar snappy-0.4.jar xz-1.8.jar plexus-utils-
  3.3.0.jar wagon-provider-api-2.10.jar file-management-3.0.0.jar plexus-
  io-3.2.0.jar maven-repository-metadata-3.0.jar plexus-archiver-4.2.1.ja
- r maven-jar-plugin-3.2.0.jar maven-model-3.0.jar
+ r maven-jar-plugin-3.2.0.jar maven-model-3.0.jar jsoup-1.13.1.jar
 

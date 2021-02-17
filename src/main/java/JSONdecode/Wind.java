@@ -1,7 +1,6 @@
 package JSONdecode;
 
-public class Wind
-{
+public class Wind {
     public float getSpeed() {
         return speed;
     }

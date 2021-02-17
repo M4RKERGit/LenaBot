@@ -1,10 +1,9 @@
 package PictureJSON;
 
-public class PicJSON
-{
+public class PicJSON {
     long total;
     long totalHits;
-    Picture hits[];
+    Picture[] hits;
 
     public long getTotal() {
         return total;

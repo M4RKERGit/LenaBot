@@ -1,7 +1,6 @@
 package JSONdecode;
 
-public class Json
-{
+public class Json {
     private JSONdecode.Coord Coord;
     private JSONdecode.Weather Weather[];
     private String Base;

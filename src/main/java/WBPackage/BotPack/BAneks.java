@@ -13,8 +13,7 @@ import java.util.Random;
 import java.net.*;
 import java.io.*;
 
-public class BAneks
-{
+public class BAneks {
     public static String getHTML() throws IOException {
         Random random = new Random();
         int rolled = 1 + random.nextInt(1142);
@@ -24,31 +23,25 @@ public class BAneks
         String inputLine;
         StringBuilder response = new StringBuilder();
 
-        while ((inputLine = html.readLine()) != null)
-        {
+        while ((inputLine = html.readLine()) != null) {
             response.append(inputLine);
         }
         return response.toString();
     }
 
-    public static String getAnek()
-    {
+    public static String getAnek() {
         String returnAnek;
         Document parsed = new Document("");
-        try
-        {
+        try {
             parsed = Jsoup.parse(getHTML());
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         returnAnek = parsed.select(".anek-view p").text();
         return returnAnek;
     }
 
-    public static void appendLog(Message message, String curDate, String user)
-    {
+    public static void appendLog(Message message, String curDate, String user) {
         String log = curDate + " Received: " + message.getText() + " " + "From: " + user;
         System.out.println(log);
         try {
@@ -59,8 +52,7 @@ public class BAneks
     }
 
     @SneakyThrows
-    public static void getVoice(SendVoice sendVoice)
-    {
+    public static void getVoice(SendVoice sendVoice) {
         Random random = new Random();
         int rolled = 1 + random.nextInt(1142);
         Process process = Runtime.getRuntime().exec("/usr/bin/python3 /root/MT/anek.py " + rolled);

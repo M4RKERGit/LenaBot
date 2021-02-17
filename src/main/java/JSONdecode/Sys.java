@@ -1,7 +1,6 @@
 package JSONdecode;
 
-public class Sys
-{
+public class Sys {
     public int getType() {
         return type;
     }

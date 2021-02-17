@@ -14,17 +14,14 @@ import java.nio.file.StandardOpenOption;
 import java.util.Date;
 import java.util.Locale;
 
-public class Main
-{
-    public static void main(String[] args)
-    {
+public class Main {
+    public static void main(String[] args) {
         Locale.setDefault(new Locale("ru", "RU"));
         ApiContextInitializer.init();
         TelegramBotsApi telegram = new TelegramBotsApi();
 
         Bot osnBot = new Bot();
-        try
-        {
+        try {
             telegram.registerBot(osnBot);
             osnBot.reportOleg();
             System.out.println("Registered, ready to work");
@@ -37,9 +34,7 @@ public class Main
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        catch (TelegramApiRequestException e)
-        {
+        } catch (TelegramApiRequestException e) {
             e.printStackTrace();
         }
     }

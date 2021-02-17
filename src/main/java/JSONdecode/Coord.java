@@ -1,7 +1,6 @@
 package JSONdecode;
 
-public class Coord
-{
+public class Coord {
     public float getLon() {
         return lon;
     }
