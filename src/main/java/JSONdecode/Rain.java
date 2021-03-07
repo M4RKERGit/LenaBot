@@ -3,7 +3,8 @@ package JSONdecode;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-public class Rain {
+public class Rain
+{
     public double getHour() {
         return hour;
     }

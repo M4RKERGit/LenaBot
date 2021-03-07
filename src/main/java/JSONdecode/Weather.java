@@ -1,6 +1,7 @@
 package JSONdecode;
 
-public class Weather {
+public class Weather
+{
     public int getId() {
         return id;
     }

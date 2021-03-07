@@ -1,6 +1,7 @@
 package PictureJSON;
 
-public class Picture {
+public class Picture
+{
     public long getId() {
         return id;
     }

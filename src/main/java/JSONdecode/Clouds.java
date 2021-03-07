@@ -1,6 +1,7 @@
 package JSONdecode;
 
-public class Clouds {
+public class Clouds
+{
     public int getAll() {
         return all;
     }

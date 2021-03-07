@@ -3,12 +3,13 @@ package WBPackage.BotPack;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class KeyboardAdding {
-    public static SendMessage setButtons(long chatId) {
+public class KeyboardAdding
+{
+    public static SendMessage setButtons(long chatId)   //стандартная процедура создания клавиатуры, можно смело копипастить
+    {
         SendMessage sendMessage = new SendMessage();
         sendMessage.enableMarkdown(true);
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
@@ -18,17 +19,17 @@ public class KeyboardAdding {
 
         List<KeyboardRow> keyboard = new ArrayList<>();
 
-        KeyboardRow keyboardFirstRow = new KeyboardRow();
+        KeyboardRow keyboardFirstRow = new KeyboardRow();   //задаём первый ряд кнопок
         keyboardFirstRow.add("Музяка");
         keyboardFirstRow.add("Анек");
         keyboardFirstRow.add("Рандом");
 
-        KeyboardRow keyboardSecondRow = new KeyboardRow();
+        KeyboardRow keyboardSecondRow = new KeyboardRow();  //и второй
         keyboardSecondRow.add("Анек войсом");
         keyboardSecondRow.add("Пикча");
         keyboardSecondRow.add("Отмена");
 
-        keyboard.add(keyboardFirstRow);
+        keyboard.add(keyboardFirstRow); //всё это добавляем
         keyboard.add(keyboardSecondRow);
         replyKeyboardMarkup.setKeyboard(keyboard);
 
@@ -46,6 +47,7 @@ public class KeyboardAdding {
                 "-------------------------------------------------------------------------------------\n" +
                 "Анек - расскажу тебе отбитый анекдот из моей коллекции\n" +
                 "Анек войсом - тож самое, но с озвучкой\n" +
+                "Анеки + <число> или Анеки войсом + <число> - несколько за раз\n" +
                 "-------------------------------------------------------------------------------------\n" +
                 "Музяка - пришлю тебе случайную песню из моей памяти с поддержкой плеера\n" +
                 "Ютуб <твой запрос> - скомунизжу для тебя mp3 любого видео с ютуба\n" +
@@ -56,6 +58,11 @@ public class KeyboardAdding {
                 "Рандом <1-е число> <2-е число> - случайное число в указанном диапазоне\n" +
                 "Если получу одно число - зароллю тебе от 0 до этого числа\n" +
                 "Рандом без чисел - ролл от 1 до 100\n" +
+                "-------------------------------------------------------------------------------------\n" +
+                "Дефолт - вывод погоды во всех городах, которые ты выбрал\n" +
+                "Дефолт город <название города> - добавить/убрать указанный город из списка\n" +
+                "Дефолт все - вывод всех городов по умолчанию\n" +
+                "Дефолт сброс - очистка списка выбранных городов\n" +
                 "-------------------------------------------------------------------------------------\n" +
                 "Если есть какие-то вопросы, напиши моему хозяину в личку @Miku\\_Tyan\n" +
                 "-------------------------------------------------------------------------------------\n" +

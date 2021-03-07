@@ -1,6 +1,7 @@
 package JSONdecode;
 
-public class Main {
+public class Main
+{
     public float getTemp() {
         return temp;
     }

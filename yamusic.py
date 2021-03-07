@@ -22,9 +22,8 @@ todos = json.loads(videosSearch.result( mode = ResultMode.json))
 video = pafy.new(todos['result'][0]['link'])
 print(todos['result'][0]['duration'])
 print(todos['result'][0]['link'])
-author = video.author
 nm = video.title
-print(nm)
+print(video.title)
 
 naming = nm.split("-")
  
@@ -38,11 +37,7 @@ if len(todos['result'][0]['duration']) <= 5:
         video.audio.write_audiofile("res_sound.mp3")
 
         audiofile = eyed3.load("res_sound.mp3")
-        audiofile.tag.artist = author
-        audiofile.tag.title = nm
-        audiofile.tag.save()
-        if "-" in nm:
-            audiofile.tag.title = naming[1].strip(" ")
-            audiofile.tag.artist = naming[0].strip(" ")
+        audiofile.tag.title = naming[1].strip(" ")
+        audiofile.tag.artist = naming[0].strip(" ")
 
-            audiofile.tag.save()
+        audiofile.tag.save()
