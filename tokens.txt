@@ -1,5 +1,0 @@
-4h5gf4d6h65y64654yht65e4y6h
-46546546-4fg4db54dfgh6dh4gd
-ru
-
-#В этот файл необходимо вписать Ваши токены. Сверху вниз: токен OpenWeatherMap, токен Pixbay, язык получения ответов с OpenWeatherMap

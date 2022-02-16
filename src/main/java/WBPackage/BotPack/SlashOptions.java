@@ -18,8 +18,7 @@ import java.util.List;
 
 public class SlashOptions
 {
-    @SneakyThrows
-    public static void getReport(SendMessage sendMessage)   //получаем из лога последние 30 записей и отсылаем в сообщении
+    public static void getReport(SendMessage sendMessage) throws IOException   //получаем из лога последние 30 записей и отсылаем в сообщении
     {
         List<String> buff;
         buff = Files.readAllLines(Paths.get("botlog.txt"));
@@ -116,7 +115,7 @@ public class SlashOptions
     public static void upBase(SendMessage sendMessage) throws IOException  //получаем БД сообщением
     {
         List<String> buff;
-        buff = Files.readAllLines(Paths.get("database.txt"));
+        buff = Files.readAllLines(Paths.get("database.json"));
         StringBuilder normalized = new StringBuilder();
         for (String s : buff) normalized.append(s).append("\n\n");
         sendMessage.setText(normalized.toString());
@@ -124,7 +123,7 @@ public class SlashOptions
 
     public static void upBaseFile(SendDocument sendDocument)    //получаем БД файлом на случай редактирования
     {
-        InputFile botLogFile = new InputFile(String.valueOf(Paths.get("database.txt")));
+        InputFile botLogFile = new InputFile(String.valueOf(Paths.get("database.json")));
         sendDocument.setDocument(botLogFile);
     }
 

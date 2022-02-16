@@ -1,1 +1,0 @@
-{"totalUsers":1,"curDate":"Sun Mar 07 01:15:02 MSK 2021","userList":[{"username":"OlegDefault","chatId":22829,"citiesList":["Трубчевск","Зеленоград"]}]}
