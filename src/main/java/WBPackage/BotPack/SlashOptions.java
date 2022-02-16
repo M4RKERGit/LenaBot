@@ -3,13 +3,16 @@ package WBPackage.BotPack;
 import lombok.SneakyThrows;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 
@@ -19,7 +22,7 @@ public class SlashOptions
     public static void getReport(SendMessage sendMessage)   //получаем из лога последние 30 записей и отсылаем в сообщении
     {
         List<String> buff;
-        buff = Files.readAllLines(Path.of("botlog.txt"));
+        buff = Files.readAllLines(Paths.get("botlog.txt"));
         StringBuilder normalized = new StringBuilder();
         for (int i = buff.size() - 30; i < buff.size(); i++)
         {
@@ -30,7 +33,7 @@ public class SlashOptions
 
     public static void getFile(SendDocument sendDocument)   //получаем полный логфайл
     {
-        File botLogFile = new File(String.valueOf(Path.of("botlog.txt")));
+        InputFile botLogFile = new InputFile("botlog.txt");
         sendDocument.setDocument(botLogFile);
     }
 
@@ -110,30 +113,25 @@ public class SlashOptions
         }
     }
 
-    @SneakyThrows
-    public static void upBase(SendMessage sendMessage)  //получаем БД сообщением
+    public static void upBase(SendMessage sendMessage) throws IOException  //получаем БД сообщением
     {
         List<String> buff;
-        buff = Files.readAllLines(Path.of("database.txt"));
+        buff = Files.readAllLines(Paths.get("database.txt"));
         StringBuilder normalized = new StringBuilder();
-        for (int i = 0; i < buff.size(); i++)
-        {
-            normalized.append(buff.get(i)).append("\n\n");
-        }
+        for (String s : buff) normalized.append(s).append("\n\n");
         sendMessage.setText(normalized.toString());
     }
 
     public static void upBaseFile(SendDocument sendDocument)    //получаем БД файлом на случай редактирования
     {
-        File botLogFile = new File(String.valueOf(Path.of("database.txt")));
+        InputFile botLogFile = new InputFile(String.valueOf(Paths.get("database.txt")));
         sendDocument.setDocument(botLogFile);
     }
 
-    @SneakyThrows
-    public static void appendLog(String text, String curDate, String user)  //фукнция логгирования
+    public static void appendLog(String text, String curDate, String user) throws IOException  //фукнция логгирования
     {
         String log = curDate + " Received: " + text + " " + "From: " + user;
         System.out.println(log);
-        Files.write(Path.of("botlog.txt"), (log + "\n").getBytes(), new StandardOpenOption[]{StandardOpenOption.APPEND});
+        Files.write(Paths.get("botlog.txt"), (log + "\n").getBytes(), new StandardOpenOption[]{StandardOpenOption.APPEND});
     }
 }

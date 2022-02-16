@@ -1,0 +1,12 @@
+package JSONdecode;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+
+@Data
+public class SnowModel
+{
+    @JsonProperty("1h")
+    double oneHour;
+    @JsonProperty("3h")
+    double threeHours;
+}

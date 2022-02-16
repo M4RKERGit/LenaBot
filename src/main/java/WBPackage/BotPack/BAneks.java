@@ -4,9 +4,11 @@ import lombok.SneakyThrows;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.telegram.telegrambots.meta.api.methods.send.SendVoice;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Random;
 import java.net.*;
@@ -53,12 +55,12 @@ public class BAneks
         Random random = new Random();
         int rolled = 1 + random.nextInt(1142);
         List<String> buff;
-        buff = Files.readAllLines(Path.of("config.txt"));   //читаем из конфига путь к скриптам
+        buff = Files.readAllLines(Paths.get("config.txt"));   //читаем из конфига путь к скриптам
         String scriptPath = buff.get(3);
         Process process = Runtime.getRuntime().exec("/usr/bin/python3 " + scriptPath + "anek.py " + rolled); //вызов скрипта на python и ожидание конца его выполнения(код скрипта приведён ниже)
         process.waitFor();
         System.out.println("exe finished");
-        sendVoice.setVoice(new File("tts_output.ogg")); //это временный файл, который перезаписывается при каждом вызове скрипта
+        sendVoice.setVoice(new InputFile("tts_output.ogg")); //это временный файл, который перезаписывается при каждом вызове скрипта
     }
 
     /*

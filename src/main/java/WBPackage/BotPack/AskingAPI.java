@@ -1,6 +1,6 @@
 package WBPackage.BotPack;
 
-import JSONdecode.Json;
+import JSONdecode.JSONModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -10,8 +10,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Scanner;
 
@@ -20,10 +19,11 @@ public class AskingAPI
     static String token;
     static String language;
     static String tokenPath = "tokens.txt";
-    @SneakyThrows
-    public static void getWeather(String cityName, SendMessage sendMessage) {
+
+    public static void getWeather(String cityName, SendMessage sendMessage) throws IOException
+    {
         List<String> buff;
-        buff = Files.readAllLines(Path.of(tokenPath));
+        buff = Files.readAllLines(Paths.get(tokenPath));
         token = buff.get(0);    //получение токена из текстового файла для доступа к OpenWeatherAPI
         language = buff.get(2); //получение языка прогноза
         String outPut;
@@ -45,14 +45,14 @@ public class AskingAPI
             }
             conTar.disconnect();
         System.out.println(outPut);
-        Json outJSON = getJSON(outPut); //перегоняем полученный JSON в объект прогноза(класс JSONDecode.Json
-        sendMessage.setText(getReport(outJSON));
+        JSONModel outJSONModel = getJSON(outPut); //перегоняем полученный JSON в объект прогноза(класс JSONDecode.Json
+        sendMessage.setText(getReport(outJSONModel));
     }
 
     @SneakyThrows
-    public static void getWeather(float longitude, float latitude, SendMessage sendMessage) {   //тут всё аналогично фукнции выше
+    public static void getWeather(@lombok.NonNull Double longitude, @lombok.NonNull Double latitude, SendMessage sendMessage) {   //тут всё аналогично фукнции выше
         List<String> buff;
-        buff = Files.readAllLines(Path.of(tokenPath));
+        buff = Files.readAllLines(Paths.get(tokenPath));
         token = buff.get(0);
         language = buff.get(2);
         String outPut = "";
@@ -80,36 +80,36 @@ public class AskingAPI
             e.printStackTrace();
         }
         System.out.println(outPut);
-        Json outJSON = AskingAPI.getJSON(outPut);
-        sendMessage.setText(AskingAPI.getReport(outJSON));
+        JSONModel outJSONModel = AskingAPI.getJSON(outPut);
+        sendMessage.setText(AskingAPI.getReport(outJSONModel));
     }
 
-    public static Json getJSON(String receivedJSON) throws IOException {    //мини-функция для получения объекта погоды из JSON - текста
+    public static JSONModel getJSON(String receivedJSON) throws IOException {    //мини-функция для получения объекта погоды из JSON - текста
         ObjectMapper JSONMapper = new ObjectMapper();
-        return JSONMapper.readValue(receivedJSON, Json.class);
+        return JSONMapper.readValue(receivedJSON, JSONModel.class);
     }
 
-    public static String getReport(Json receivedJSON)   //функция составления справки о погоде на основе полученного JSON'а
+    public static String getReport(JSONModel receivedJSONModel)   //функция составления справки о погоде на основе полученного JSON'а
     {
         String toReturn = "";
-        if (receivedJSON.getName() != null)
+        if (receivedJSONModel.getName() != null)
         {
-            toReturn += "Город: " + receivedJSON.getName() + "\n";
+            toReturn += "Город: " + receivedJSONModel.getName() + "\n";
         }
-        toReturn += "Погода: " + receivedJSON.getWeather()[0].getDescription() + "\n";
-        toReturn += "Температура: " + String.format("%.1f", receivedJSON.getMain().getTemp() - 273.15) + " C\n";    //температуру API присылает в Фаренгейтах, поэтому "кастуем" в Цельсий
-        toReturn += "Ощущается как: " + String.format("%.1f", receivedJSON.getMain().getFeels_like() - 273.15) + " C\n";
-        toReturn += "Давление: " + receivedJSON.getMain().getPressure() + " мм рт. ст.\n";
-        toReturn += "Скорость ветра: " + receivedJSON.getWind().getSpeed() + " м/c\n";
+        toReturn += "Погода: " + receivedJSONModel.getWeatherModel()[0].getDescription() + "\n";
+        toReturn += "Температура: " + String.format("%.1f", receivedJSONModel.getMainModel().getTemp() - 273.15) + " C\n";    //температуру API присылает в Фаренгейтах, поэтому "кастуем" в Цельсий
+        toReturn += "Ощущается как: " + String.format("%.1f", receivedJSONModel.getMainModel().getFeels_like() - 273.15) + " C\n";
+        toReturn += "Давление: " + receivedJSONModel.getMainModel().getPressure() + " мм рт. ст.\n";
+        toReturn += "Скорость ветра: " + receivedJSONModel.getWindModel().getSpeed() + " м/c\n";
 
-        if (receivedJSON.getRain() != null)
+        if (receivedJSONModel.getRainModel() != null)
         {
-            toReturn += "Объём дождя в ближайший час: " + receivedJSON.getRain().getHour() + "\n";
+            toReturn += "Объём дождя в ближайший час: " + receivedJSONModel.getRainModel().getOneHour() + "\n";
         }
 
-        if (receivedJSON.getSnow() != null)
+        if (receivedJSONModel.getSnowModel() != null)
         {
-            toReturn += "Объём снега в ближайший час: " + receivedJSON.getSnow().getHour() + "\n";
+            toReturn += "Объём снега в ближайший час: " + receivedJSONModel.getSnowModel().getOneHour() + "\n";
         }
         return toReturn;
     }

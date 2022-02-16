@@ -33,7 +33,7 @@ public class KeyboardAdding
         keyboard.add(keyboardSecondRow);
         replyKeyboardMarkup.setKeyboard(keyboard);
 
-        sendMessage.setChatId(chatId);
+        sendMessage.setChatId(String.valueOf(chatId));
         sendMessage.setReplyMarkup(replyKeyboardMarkup);
         sendMessage.setText("Привет!\n" +
                 "Я погодный бот, отправь в этот чат название города (или даже страны, если она небольшая :3) на RU/EN языке и я дам тебе краткую справку по погоде в этом городе.\n" +

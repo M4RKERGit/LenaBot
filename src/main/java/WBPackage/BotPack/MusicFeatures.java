@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Random;
@@ -32,8 +33,7 @@ public class MusicFeatures
         sendMessage.setText(comms[random.nextInt(3)]);  //рандомим их
     }
 
-    @SneakyThrows
-    public static void getYouTube(SendMessage sendMessage, SendAudio sendMusic, String received)    //фукнция скачивания песен с YouTube
+    public static void getYouTube(SendMessage sendMessage, SendAudio sendMusic, String received) throws IOException, InterruptedException    //фукнция скачивания песен с YouTube
     {
         sendMessage.setText("Нашла по твоему запросу: ");
         String[] GOT = received.split(" ", 3);  //получаем аргумент
@@ -51,7 +51,7 @@ public class MusicFeatures
         {
             System.out.println("Конечный запрос: " + request);
             List<String> buff;
-            buff = Files.readAllLines(Path.of("config.txt"));   //читаем из конфига путь к скриптам
+            buff = Files.readAllLines(Paths.get("config.txt"));   //читаем из конфига путь к скриптам
             String scriptPath = buff.get(3);
             Process process = Runtime.getRuntime().exec("/usr/bin/python3 " + scriptPath + "yamusic.py " + request); //запуск скрипта на python(код ниже)
             process.waitFor();
@@ -61,7 +61,7 @@ public class MusicFeatures
                 sendMessage.setText("Извини, длина видео превышает 15 минут или такого видео не существует");
                 return;
             }
-            sendMusic.setAudio(new File("res_sound.mp3"));
+            sendMusic.setAudio(new InputFile("res_sound.mp3"));
         }
 
         /*

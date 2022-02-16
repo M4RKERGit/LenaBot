@@ -1,11 +1,12 @@
 package WBPackage.BotPack;
 
-import PictureJSON.PicJSON;
+import PictureJSON.PicJSONModel;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -13,6 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
@@ -36,7 +38,7 @@ public class PictureFeatures
         }
         System.out.println(path);
         assert path != null;
-        java.io.File hmmm = new java.io.File(path);
+        InputFile hmmm = new InputFile(path);
         sendPhoto.setPhoto(hmmm);
         String[] comms = new String[] {"Красота же!", "Мне очень нравится это фото", "Доставлено!"};
         sendMessage.setText(comms[random.nextInt(3)]);
@@ -46,7 +48,7 @@ public class PictureFeatures
     public static void getPic(SendPhoto sendPhoto, SendMessage sendMessage, String received)    //поиск фото по тегам и отправка
     {
         List<String> buff;
-        buff = Files.readAllLines(Path.of(tokenPath));
+        buff = Files.readAllLines(Paths.get(tokenPath));
         token = buff.get(1);
         String[] GOT = received.split(" ", 3);
         StringBuilder requestBuilder = new StringBuilder();
@@ -79,8 +81,8 @@ public class PictureFeatures
             }
             conTar.disconnect();
             System.out.println(outPut);
-            PicJSON outJSON = getJSON(outPut);  //перегоняем полученный JSON в наш объект
-            File bufPhoto = getURLPic(outJSON, sendMessage);    //получаем фото по ссылке
+            PicJSONModel outJSON = getJSON(outPut);  //перегоняем полученный JSON в наш объект
+            InputFile bufPhoto = getURLPic(outJSON, sendMessage);    //получаем фото по ссылке
             if (bufPhoto == null)   //на случай, если у функции ничего не вышло
             {
                 sendMessage.setText("Сорри, но я не нашла таких картинок, попробуй указать другие теги");
@@ -95,14 +97,14 @@ public class PictureFeatures
 
 
     @SneakyThrows
-    public static PicJSON getJSON(String receivedJSON)  //перегонка JSON в наш объект
+    public static PicJSONModel getJSON(String receivedJSON)  //перегонка JSON в наш объект
     {
         ObjectMapper JSONMapper = new ObjectMapper();
-        return JSONMapper.readValue(receivedJSON, PicJSON.class);
+        return JSONMapper.readValue(receivedJSON, PicJSONModel.class);
     }
 
 
-    public static File getURLPic(PicJSON receivedJSON, SendMessage sendMessage) //"расчленение" JSON'a и получение ссылки на случайную картинку из результатов поиска
+    public static InputFile getURLPic(PicJSONModel receivedJSON, SendMessage sendMessage) //"расчленение" JSON'a и получение ссылки на случайную картинку из результатов поиска
     {
         String path = "picturebuff.jpg";    //временный файл, обновляется каждый вызов скрипта
         Random random = new Random();
@@ -157,6 +159,6 @@ public class PictureFeatures
         catch (IOException e) {
             sendMessage.setText("Сорри, но я не нашла таких картинок, попробуй указать другие теги");
         }
-        return new File(path);  //возвращаем файл по старому пути, т.к. перезаписали его
+        return new InputFile(path);  //возвращаем файл по старому пути, т.к. перезаписали его
     }
 }
