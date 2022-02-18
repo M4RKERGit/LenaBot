@@ -1,12 +1,12 @@
 package WBPackage.BotPack;
 
 import UserJSON.DataBase;
-import UserJSON.User;
+import UserJSON.UserModel;
 import WBPackage.ProjectConfiguration;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Data;
-import lombok.SneakyThrows;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -17,9 +17,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.*;
 import java.nio.file.Paths;
-import java.util.Date;
-import java.util.Objects;
-import java.util.Random;
+import java.time.LocalDateTime;
+import java.util.*;
 
 
 public class Bot extends TelegramLongPollingBot
@@ -31,12 +30,30 @@ public class Bot extends TelegramLongPollingBot
     private final ProjectConfiguration config = new ProjectConfiguration();
     private final WeatherApiService weatherService = new WeatherApiService(config.getWeatherToken(), config.getLanguage());
     private final MusicService musicService = new MusicService(config.getPythonScripts());
+    private final AnekService anekService = new AnekService();
+    private final ObjectMapper jsonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+    private final ObjectWriter jsonWriter = jsonMapper.writer(new DefaultPrettyPrinter());
 
-    private void loadBase() throws IOException
+    private void loadBase()
     {
-        ObjectMapper mapper = new ObjectMapper();
-        dataBase = mapper.readValue(Paths.get(dataBasePath).toFile(), DataBase.class);
-        logger.info("Base loaded");
+        try
+        {
+            dataBase = jsonMapper.readValue(Paths.get(dataBasePath).toFile(), DataBase.class);
+            logger.info("Base loaded");
+        }
+        catch (Exception e)
+        {
+            dataBase = new DataBase(0L, "", new ArrayList<>());
+            logger.info("Database lost, creating new one...");
+        }
+    }
+
+    private void dumpBase() throws IOException
+    {
+        dataBase.setCurDate(LocalDateTime.now().toString());
+        dataBase.setTotalUsers(dataBase.getUserList().size());
+        jsonWriter.writeValue(new File(dataBasePath), dataBase);
+        logger.info("Base dumped");
     }
 
     @Override
@@ -55,14 +72,16 @@ public class Bot extends TelegramLongPollingBot
                 String user = update.getMessage().getFrom().getFirstName() + " " + update.getMessage().getFrom().getLastName(); //получим имя юзера для логгирования
                 String curDate = new Date().toString(); //для этого же и время обработки сообщения
 
-                if (!(dataBase.checkUser(update.getMessage(), dataBase)))   //проверяем наличие юзера у нас в базе, если его нет, то создаём ему "учётку" и обновляем базу
+                if (messageText.contains("/")) SlashOptions.appendLog("[ADMIN]" + messageText, curDate, user);
+                else SlashOptions.appendLog("[USER]" + messageText, curDate, user);
+
+                if (!dataBase.getUserList().contains(new UserModel(user, chatId, new ArrayList<>())))   //проверяем наличие юзера у нас в базе, если его нет, то создаём ему "учётку" и обновляем базу
                 {
                     sendMessage.setText("Видимо, ты впервые написал мне (либо Олег опять потерял всю мою базу данных -_-).\nЯ создала тебе профиль с настройками, можешь редактировать и пользоваться ими с помощью команды Дефолт");
                     execute(sendMessage);
-                    dataBase.refreshBase(dataBase, curDate);    //обновление базы
-                    dataBase.overWrite(dataBase, dataBasePath); //перезапись на диске
+                    dataBase.getUserList().add(new UserModel(user, chatId, new ArrayList<>()));
+                    dumpBase();
                 }
-
 //            if (update.getMessage().hasSticker())   //просто ламповая фича
 //            {
 //                SlashOptions.appendLog("[USER]" + messageText, curDate, user); //здесь и далее используется для логгирования
@@ -87,7 +106,6 @@ public class Bot extends TelegramLongPollingBot
                     switch(lowCase) //свич, который разбирает, какая команда нужна пользователю
                     {
                         case ("музяка"):
-                            SlashOptions.appendLog("[USER]" + messageText, curDate, user);
                             SendAudio sendAudio = new SendAudio();
                             sendAudio.setChatId(chatId);
                             musicService.randPlayer(sendMessage, sendAudio);   //получаем музыку, подробнее в классе MusicFeatures
@@ -95,25 +113,22 @@ public class Bot extends TelegramLongPollingBot
                             execute(sendMessage);
                             return;
                         case ("анек"):
-                            SlashOptions.appendLog("[USER]" + messageText, curDate, user);
                             sendMessage.setText("Внимание, анекдот!");
                             execute(sendMessage); //тут задержки просто для драматичости xD
                             Thread.sleep(2000);
-                            sendMessage.setText(BAneks.getAnek());  //получаем анекдот, подробнее в классе BAneks
+                            sendMessage.setText(anekService.getAnek());  //получаем анекдот, подробнее в классе BAneks
                             execute(sendMessage);
                             Thread.sleep(2000);
                             sendMessage.setText("Ахахаххахахахахха");
                             execute(sendMessage);
                             return;
                         case ("анек войсом"):
-                            SlashOptions.appendLog("[USER]" + messageText, curDate, user);
                             SendVoice sendVoice = new SendVoice();
                             sendVoice.setChatId(chatId);
-                            BAneks.getVoice(sendVoice); //получаем голосовое, подброее в классе BAneks
+                            anekService.getVoice(sendVoice); //получаем голосовое, подброее в классе BAneks
                             execute(sendVoice);
                             return;
                         case("пикча"):
-                            SlashOptions.appendLog("[USER]" + messageText, curDate, user);
                             SendPhoto sendPhoto = new SendPhoto();
                             sendPhoto.setChatId(chatId);
                             PictureFeatures.getPic(sendPhoto, sendMessage); //получаем картинку, подробнее в классе PictureFeatures
@@ -121,25 +136,23 @@ public class Bot extends TelegramLongPollingBot
                             execute(sendPhoto);
                             return;
                         case ("дефолт"):
-                            SlashOptions.appendLog("[USER]" + messageText, curDate, user);
                             //получаем список городов пользователя, от которого пришло сообщение, все методы в подробностях в классе DataBase
-                            String[] cList = dataBase.getUserList()[dataBase.findUserNum(Long.parseLong(chatId), dataBase.getUserList())].getCitiesList();
-                            if (cList == null)  //если городов нет
+                            UserModel curUser = dataBase.getUserList().stream().filter(mod -> mod.getChatId().equals(chatId)).findFirst().get();
+                            if (curUser.getCitiesList().isEmpty())
                             {
                                 sendMessage.setText("У тебя нет городов по умолчанию, попробуй их добавить");
                                 execute(sendMessage);
                                 return;
                             }
-                            for (String s : cList)  //если есть, то отправляем погоду во всех городах по порядку
+                            for (String s : curUser.getCitiesList())  //если есть, то отправляем погоду во всех городах по порядку
                             {
                                 weatherService.getWeather(s, sendMessage);
                                 execute(sendMessage);
                             }
                             return;
                         case ("дефолт все"):
-                            SlashOptions.appendLog("[USER]" + messageText, curDate, user);    //в этом кейсе всё аналогично предыдущему
-                            cList = dataBase.getUserList()[dataBase.findUserNum(update.getMessage().getChatId(), dataBase.getUserList())].getCitiesList();
-                            if (cList == null)
+                            curUser = dataBase.getUserList().stream().filter(mod -> mod.getChatId().equals(chatId)).findFirst().get();
+                            if (curUser.getCitiesList().isEmpty())
                             {
                                 sendMessage.setText("У тебя нет городов по умолчанию :(");
                                 execute(sendMessage);
@@ -147,55 +160,47 @@ public class Bot extends TelegramLongPollingBot
                             }
                             sendMessage.setText("Твои города по умолчанию:");
                             execute(sendMessage);
-                            for (String s : cList)
+                            for (String s : curUser.getCitiesList())
                             {
                                 sendMessage.setText(s);
                                 execute(sendMessage);
                             }
                             return;
                         case ("дефолт сброс"):
-                            SlashOptions.appendLog("[USER]" + messageText, curDate, user);
-                            dataBase.getUserList()[dataBase.findUserNum(Long.parseLong(chatId), dataBase.getUserList())].setCitiesList(null);  //чистим список городов
-                            dataBase.overWrite(dataBase, dataBasePath); //и записываем
+                            int index = dataBase.getUserList().indexOf(new UserModel(user, chatId, null));
+                            dataBase.getUserList().get(index).getCitiesList().clear();
                             sendMessage.setText("Города по умолчанию очищены");
                             execute(sendMessage);
                             return;
                         case ("/start"):
                         case ("/help"):
-                            SlashOptions.appendLog("[USER]" + messageText, curDate, user);
                             lastHelp = execute(KeyboardAdding.setButtons(update.getMessage().getChatId())); //выставляем экранные кнопки и выводим справку, подробнее в классе KeyboardAdding
                             return;
                         case ("/uplog"):
-                            SlashOptions.appendLog("[ADMIN]" + messageText, curDate, user);
                             SlashOptions.getReport(sendMessage);    //получаем последние 30 записей лога, подробнее в классе SlashOptions
                             execute(sendMessage);
                             return;
                         case ("/uplogfile"):
-                            SlashOptions.appendLog("[ADMIN]" + messageText, curDate, user);
                             SendDocument sendDocument = new SendDocument();
                             sendDocument.setChatId(chatId);
                             SlashOptions.getFile(sendDocument); //получаем целый файл лога, т.к. телеграм не позволяет слать такие большие сообщения
                             execute(sendDocument);
                             return;
                         case ("/getup"):
-                            SlashOptions.appendLog("[ADMIN]" + messageText, curDate, user);
                             SlashOptions.getUp(sendMessage);    //получаем аптайм
                             execute(sendMessage);
                             return;
                         case ("/upbase"):
-                            SlashOptions.appendLog("[ADMIN]" + messageText, curDate, user);
                             SlashOptions.upBase(sendMessage);   //получаем нашу базу данных в виде сообщения...
                             execute(sendMessage);
                             return;
                         case ("/upbasefile"):
-                            SlashOptions.appendLog("[ADMIN]" + messageText, curDate, user);
                             sendDocument = new SendDocument();
                             sendDocument.setChatId(chatId);
                             SlashOptions.upBaseFile(sendDocument);  //... и в виде файла
                             execute(sendDocument);
                             return;
                         case ("отмена"):
-                            SlashOptions.appendLog("[USER]" + messageText, curDate, user);
                             return;
                         case ("спасибо"):
 //                            SlashOptions.appendLog("[USER]" + messageText, curDate, user);
@@ -205,24 +210,22 @@ public class Bot extends TelegramLongPollingBot
                         default:    //здесь и далее - код для сообщений с аргументами
                             if (lowCase.contains("анеки войсом"))
                             {
-                                SlashOptions.appendLog("[USER]" + messageText, curDate, user);
                                 String[] GOT = messageText.split(" ", 3); //делим сообщение на слова, чтобы получить аргумент, с которым будем работать
                                 for (int i = 0; i < Integer.parseInt(GOT[2]); i++)  //и i раз кидаем озвучку анекдота
                                 {
                                     SendVoice sendMultVoice = new SendVoice();
                                     sendMultVoice.setChatId(chatId);
-                                    BAneks.getVoice(sendMultVoice);
+                                    anekService.getVoice(sendMultVoice);
                                     execute(sendMultVoice);
                                 }
                                 return;
                             }
                             if (lowCase.contains("анеки"))
                             {
-                                SlashOptions.appendLog("[USER]" + messageText, curDate, user);
                                 String[] GOT = messageText.split(" ", 2); //всё аналогично предыдущему if'у, но текстом
                                 for (int i = 0; i < Integer.parseInt(GOT[1]); i++)
                                 {
-                                    sendMessage.setText(BAneks.getAnek());
+                                    sendMessage.setText(anekService.getAnek());
                                     execute(sendMessage);
                                 }
                                 return;
@@ -230,7 +233,6 @@ public class Bot extends TelegramLongPollingBot
 
                             if (lowCase.contains("пикча"))
                             {
-                                SlashOptions.appendLog("[USER]" + messageText, curDate, user);
                                 sendMessage.setText("Один момент, уже ищу...");
                                 execute(sendMessage);
                                 sendPhoto = new SendPhoto();
@@ -243,7 +245,6 @@ public class Bot extends TelegramLongPollingBot
                             }
                             if (lowCase.contains("ютуб"))
                             {
-                                SlashOptions.appendLog("[USER]" + messageText, curDate, user);
                                 sendMessage.setText("Один момент, уже ищу...");
                                 execute(sendMessage);
                                 sendAudio = new SendAudio();
@@ -255,34 +256,34 @@ public class Bot extends TelegramLongPollingBot
                             }
                             if (lowCase.contains("рандом"))
                             {
-                                SlashOptions.appendLog("[USER]" + messageText, curDate, user);
                                 sendMessage.setText("Зароллено: " + RandomTools.replyRand(messageText));  //тут возможен запуск с аргументами, смотрим класс RandomTools
                                 execute(sendMessage);
                                 return;
                             }
                             if (lowCase.contains("дефолт город"))
                             {
-                                SlashOptions.appendLog("[USER]" + messageText, curDate, user);
-                                String[] GOT = messageText.split(" ", 3); //получаем аргумент-название города
-                                if (User.cityUpdate(GOT[2], Objects.requireNonNull(dataBase.findUser(update.getMessage().getChatId(), dataBase.getUserList())))) //если cityUpdate вернул true, то это значит, что город был добавлен
+                                String city = messageText.split(" ", 3)[2]; //получаем аргумент-название города
+                                curUser = dataBase.getUserList().stream().filter(mod -> mod.getChatId().equals(chatId)).findFirst().get();
+                                if (curUser.getCitiesList().contains(city))
                                 {
-                                    sendMessage.setText("Город " + GOT[2] + " был добавлен к твоим стандартным, используй команду Дефолт, чтобы получить прогноз по всем интересующим тебя местам");
+                                    curUser.getCitiesList().remove(city);
+                                    sendMessage.setText("Город " + city + " был удалён из твоих стандартных");    //если же false, то город был удалён из списка, подробнее в классе User
                                     execute(sendMessage);
-                                    dataBase.overWrite(dataBase, dataBasePath);
-                                    return;
                                 }
-                                sendMessage.setText("Город " + GOT[2] + " был удалён из твоих стандартных");    //если же false, то город был удалён из списка, подробнее в классе User
-                                execute(sendMessage);
-                                //overWrite нужен после всех изменений, как оказалось, это не просаживает производительность, как минимум, на небольших объёмах dataBase, в другом случае может понадобиться некий counter для перезаписи после n обращений к боту
-                                dataBase.overWrite(dataBase, dataBasePath);
+                                else
+                                {
+                                    curUser.getCitiesList().add(city);
+                                    sendMessage.setText("Город " + city + " был добавлен к твоим стандартным, " +
+                                            "используй команду Дефолт, чтобы получить прогноз по всем интересующим тебя местам");
+                                    execute(sendMessage);
+                                }
+                                dumpBase();
                                 return;
                             }
                             //сработает в случае несовпадения с любыми другими кейсами, буквально, все команды, кроме прописанных выше, воспринимаются, как названия городов
                             if (!messageText.equals(""))
                             {
-                                SlashOptions.appendLog("[USER]" + messageText, curDate, user);
-                                String cityName = messageText;
-                                weatherService.getWeather(cityName, sendMessage);
+                                weatherService.getWeather(messageText, sendMessage);
                                 execute(sendMessage);
                             }
                     }
